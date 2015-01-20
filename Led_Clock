@@ -1,0 +1,122 @@
+#line 1 "JIMCLOCK.ino"
+#include <Adafruit_NeoPixel.h>
+
+#include <Wire.h>
+#include "RTClib.h"
+
+#include "Arduino.h"
+RTC_DS1307 rtc;
+
+#define PIN 6
+#define NUMLEDS 150
+#define LEDSTART 8                     
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMLEDS, PIN, NEO_GRB + NEO_KHZ800);
+
+void HSVtoRGB(int hue, int sat, int val,int *colors) {
+  	int r, g, b, base;
+	                                                 
+
+	if (sat == 0) {                            
+		colors[0]=val;
+		colors[1]=val;
+		colors[2]=val;
+	} else  {
+		base = ((255 - sat) * val)>>8;
+		switch(hue/60) {
+			case 0:
+				colors[0] = val;
+				colors[1] = (((val-base)*hue)/60)+base;
+				colors[2] = base;
+				break;
+			case 1:
+				colors[0] = (((val-base)*(60-(hue%60)))/60)+base;
+				colors[1] = val;
+				colors[2] = base;
+				break;
+			case 2:
+				colors[0] = base;
+				colors[1] = val;
+				colors[2] = (((val-base)*(hue%60))/60)+base;
+				break;
+			case 3:
+				colors[0] = base;
+				colors[1] = (((val-base)*(60-(hue%60)))/60)+base;
+				colors[2] = val;
+				break;
+			case 4:
+				colors[0] = (((val-base)*(hue%60))/60)+base;
+				colors[1] = base;
+				colors[2] = val;
+				break;
+			case 5:
+				colors[0] = val;
+				colors[1] = base;
+				colors[2] = (((val-base)*(60-(hue%60)))/60)+base;
+				break;
+		}
+		
+	}
+}
+
+void setup() {
+  Serial.begin(115200);
+  strip.begin();
+  strip.show();                                  
+  Wire.begin();
+  rtc.begin();
+}
+
+void DoClock() {
+  DateTime now = rtc.now(); 
+  int hour = now.hour();
+  int minute = now.minute();
+  int second = now.second();
+  int col[3];
+
+  strip.clear();
+                                     
+  for(int j=0; j < hour; j++) {
+    HSVtoRGB(random(0,360),255,255, col);
+    strip.setPixelColor(LEDSTART+j,col[0], col[1], col[2]);
+  } 
+  HSVtoRGB(random(0,360),255,255, col);
+  strip.setPixelColor(hour + LEDSTART,col[0], col[1], col[2] );  
+ 
+                    
+  for(int k=0; k< minute; k++) {
+    HSVtoRGB(random(0,360),255,255, col);
+    strip.setPixelColor(LEDSTART+24+k, col[0], col[1], col[2]);
+  }
+  HSVtoRGB(random(0,360),255,255, col);
+  strip.setPixelColor(now.minute() + LEDSTART+24, col[0], col[1], col[2]);
+  
+                      
+  for(int l=0; l< second; l++) {
+    HSVtoRGB(random(0,360),255,255, col);
+    strip.setPixelColor(LEDSTART+24+60+l, col[0], col[1], col[2]);
+  } 
+  HSVtoRGB(random(0,360),255,255, col);
+  strip.setPixelColor(now.second() + LEDSTART+24+60, col[0], col[1], col[2]);
+  strip.show();  
+}
+
+void LedsOff() {
+  strip.clear();
+  strip.show(); 
+}
+
+void loop() {
+  DateTime now = rtc.now(); 
+  if ((now.hour() < 22) || (now.hour() > 7)) {
+    DoClock();
+  }
+   
+  
+//  if (now.hour() > 19) {
+//    DoClock();
+//  } else {
+//    LedsOff();
+//  }
+  delay(400);
+}
