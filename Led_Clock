@@ -78,11 +78,10 @@ void DoClock() {
                                      
   for(int j=0; j < hour; j++) {
     HSVtoRGB(random(0,360),255,255, col);
-    strip.setPixelColor(LEDSTART+j,col[0], col[1], col[2]);
+    strip.setPixelColor(LEDSTART + j,col[0], col[1], col[2]);
   } 
   HSVtoRGB(random(0,360),255,255, col);
   strip.setPixelColor(hour + LEDSTART,col[0], col[1], col[2] );  
- 
                     
   for(int k=0; k< minute; k++) {
     HSVtoRGB(random(0,360),255,255, col);
@@ -90,7 +89,6 @@ void DoClock() {
   }
   HSVtoRGB(random(0,360),255,255, col);
   strip.setPixelColor(now.minute() + LEDSTART+24, col[0], col[1], col[2]);
-  
                       
   for(int l=0; l< second; l++) {
     HSVtoRGB(random(0,360),255,255, col);
@@ -98,25 +96,24 @@ void DoClock() {
   } 
   HSVtoRGB(random(0,360),255,255, col);
   strip.setPixelColor(now.second() + LEDSTART+24+60, col[0], col[1], col[2]);
+  
   strip.show();  
-}
-
-void LedsOff() {
-  strip.clear();
-  strip.show(); 
 }
 
 void loop() {
   DateTime now = rtc.now(); 
-  if ((now.hour() < 22) || (now.hour() > 7)) {
-    DoClock();
+  if ((now.hour() >= 22) || (now.hour() <= 7)) { 
+    strip.clear();
+    strip.show();
+  }  else {
+    DoClock();  
   }
-   
-  
-//  if (now.hour() > 19) {
-//    DoClock();
-//  } else {
-//    LedsOff();
-//  }
   delay(400);
 }
+
+                                                                                 
+                                                                                   
+                                                                                   
+                                                                                 
+    
+
